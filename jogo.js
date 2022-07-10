@@ -10,9 +10,9 @@ let frames = 0;
 const canvas = document.querySelector('canvas');
 const contexto = canvas.getContext('2d');
 
-function Colisao (flappyBird, Chao) {
-    const flappyBirdY = flappyBird.Y + flappyBird.Altura;
-    const ChaoY = Chao.Y;
+function ColisaoChaoComFlappyBird (flappyBird, Chao) {
+    const flappyBirdY = flappyBird.y + flappyBird.Altura;
+    const ChaoY = Chao.y;
 
     if (flappyBirdY >= ChaoY) {
         return true;
@@ -27,8 +27,8 @@ function CriaFlappyBird() {
         SpriteY: 0,
         Largura: 33,
         Altura: 24,
-        X: 10,
-        Y: 50,
+        x: 10,
+        y: 50,
         velocidade: 0,
         gravidade: 0.25,
         pulo: 4.6,
@@ -36,19 +36,16 @@ function CriaFlappyBird() {
             flappyBird.velocidade = - flappyBird.pulo;
         },
         atualiza() {
-            if(Colisao(flappyBird, globais.Chao)) {
+            if(ColisaoChaoComFlappyBird(flappyBird, globais.Chao)) {
                 som_HIT.play();  
 
-                setTimeout(() => {
-                    mudaparaTela(Telas.INICIO);   
-                }, 500); 
+                mudaparaTela(Telas.GAME_OVER);   
 
                 return;
             }
     
             flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade;
-            flappyBird.Y = flappyBird.Y + flappyBird.velocidade;
-            console.log();
+            flappyBird.y = flappyBird.y + flappyBird.velocidade;
         },
         movimentos: [
             { SpriteX: 0, SpriteY: 0, },
@@ -79,8 +76,8 @@ function CriaFlappyBird() {
                 SpriteY,
                 flappyBird.Largura, 
                 flappyBird.Altura,
-                flappyBird.X,
-                flappyBird.Y,
+                flappyBird.x,
+                flappyBird.y,
                 flappyBird.Largura, 
                 flappyBird.Altura,
             );
@@ -101,7 +98,7 @@ function CriaCanos() {
             SpriteX: 52,
             SpriteY: 169,
         },
-        espaco: 80,
+        espaco: 100,
         desenha() {
 
             Canos.pares.forEach(function(par){
@@ -147,7 +144,6 @@ function CriaCanos() {
                     x: CanoChaoX,
                     y: CanoChaoY
                 }
-
             })
         },
         ColisaoCanoComFlappyBird(par) {
@@ -155,7 +151,7 @@ function CriaCanos() {
             const CabecaFlappyBird = globais.flappyBird.y;
             const PeFlappyBird = globais.flappyBird.y + globais.flappyBird.Altura;
 
-            if (globais.flappyBird.x >= par.x) {
+            if (globais.flappyBird.x + globais.flappyBird.Largura >= par.x) {
 
                 if (CabecaFlappyBird <= par.canoCeu.y) {
                     return true;
@@ -171,28 +167,26 @@ function CriaCanos() {
         atualiza() {
 
             if (frames % 100 === 0) {
-
                 Canos.pares.push({
                     x: canvas.width, 
                     y: -150 * (Math.random() + 1),
                 });
-
             }
             
             Canos.pares.forEach(function(par) {
                 par.x = par.x - 2;
-                console.log('status', Canos.ColisaoCanoComFlappyBird(par));
-                if(Canos.ColisaoCanoComFlappyBird(par)) {
-                    mudaparaTela(Telas.INICIO);
-                }
 
-                if ((par.x + Canos.Largura) < 0) {
+
+                if(Canos.ColisaoCanoComFlappyBird(par)) {
+                    som_HIT.play();
+                    mudaparaTela(Telas.GAME_OVER);
+                }
+                if (par.x + Canos.Largura <= 0) {
                     Canos.pares.shift();
                 }
             })
         }
     }
-
     return Canos;
 }
 
@@ -203,14 +197,14 @@ function CriaChao() {
         SpriteY: 610,
         Largura: 224,
         Altura: 112,
-        X: 0,
-        Y: canvas.height - 112,
+        x: 0,
+        y: canvas.height - 112,
         atualiza() {
             const MovimentoChao = 1;
             const repete = Chao.Largura / 2;
-            const Movimentacao = Chao.X - MovimentoChao;
+            const Movimentacao = Chao.x - MovimentoChao;
 
-            Chao.X = Movimentacao % repete
+            Chao.x = Movimentacao % repete
         },
         desenha() {
             contexto.drawImage(
@@ -219,8 +213,8 @@ function CriaChao() {
                 Chao.SpriteY,
                 Chao.Largura,
                 Chao.Altura,
-                Chao.X,
-                Chao.Y,
+                Chao.x,
+                Chao.y,
                 Chao.Largura,
                 Chao.Altura,
             );
@@ -231,8 +225,8 @@ function CriaChao() {
                 Chao.SpriteY,
                 Chao.Largura,
                 Chao.Altura,
-                (Chao.X + Chao.Largura),
-                Chao.Y,
+                (Chao.x + Chao.Largura),
+                Chao.y,
                 Chao.Largura,
                 Chao.Altura,
             );
@@ -247,8 +241,8 @@ const PlanoDeFundo = {
     SpriteY: 0,
     Largura: 275,
     Altura: 204,
-    X: 0,
-    Y: canvas.height - 204,
+    x: 0,
+    y: canvas.height - 204,
     desenha() {
 
         contexto.fillStyle = '#70c5ce';
@@ -260,8 +254,8 @@ const PlanoDeFundo = {
             PlanoDeFundo.SpriteY,
             PlanoDeFundo.Largura,
             PlanoDeFundo.Altura,
-            PlanoDeFundo.X,
-            PlanoDeFundo.Y,
+            PlanoDeFundo.x,
+            PlanoDeFundo.y,
             PlanoDeFundo.Largura,
             PlanoDeFundo.Altura,
         );
@@ -272,8 +266,8 @@ const PlanoDeFundo = {
             PlanoDeFundo.SpriteY,
             PlanoDeFundo.Largura,
             PlanoDeFundo.Altura,
-            (PlanoDeFundo.X + PlanoDeFundo.Largura),
-            PlanoDeFundo.Y,
+            (PlanoDeFundo.x + PlanoDeFundo.Largura),
+            PlanoDeFundo.y,
             PlanoDeFundo.Largura,
             PlanoDeFundo.Altura,
         );
@@ -285,8 +279,8 @@ const MensagemGetReady = {
     SpriteY: 0,
     Largura: 174,
     Altura: 152,
-    X: (canvas.width / 2) - 174 / 2,
-    Y: 50,
+    x: (canvas.width / 2) - 174 / 2,
+    y: 50,
     desenha() {
         contexto.drawImage(
             sprites,
@@ -294,10 +288,33 @@ const MensagemGetReady = {
             MensagemGetReady.SpriteY,
             MensagemGetReady.Largura,
             MensagemGetReady.Altura,
-            MensagemGetReady.X,
-            MensagemGetReady.Y,
+            MensagemGetReady.x,
+            MensagemGetReady.y,
             MensagemGetReady.Largura,
             MensagemGetReady.Altura,
+        );
+    },
+}
+
+//Game Over
+const MensagemGameOver = {
+    SpriteX: 134,
+    SpriteY: 153,
+    Largura: 226,
+    Altura: 200,
+    x: (canvas.width / 2) - 226 / 2,
+    y: 50,
+    desenha() {
+        contexto.drawImage(
+            sprites,
+            MensagemGameOver.SpriteX,
+            MensagemGameOver.SpriteY,
+            MensagemGameOver.Largura,
+            MensagemGameOver.Altura,
+            MensagemGameOver.x,
+            MensagemGameOver.y,
+            MensagemGameOver.Largura,
+            MensagemGameOver.Altura,
         );
     },
 }
@@ -336,11 +353,15 @@ const Telas = {
     },
 
     JOGO: {
+        inicializa() {
+            globais.placar = criaPlacar();
+        },
         desenha() {
             PlanoDeFundo.desenha();
-            globais.flappyBird.desenha();
             globais.Canos.desenha();
             globais.Chao.desenha();
+            globais.flappyBird.desenha();
+            globais.placar.desenha();
         },
         click() {
             globais.flappyBird.pula()
@@ -349,8 +370,42 @@ const Telas = {
             globais.flappyBird.atualiza();
             globais.Canos.atualiza();
             globais.Chao.atualiza();
+            globais.placar.atualiza();
         }
     }
+}
+
+Telas.GAME_OVER = {
+    desenha() {
+        MensagemGameOver.desenha();
+    },
+    atualiza() {
+
+    },
+    click() {
+        mudaparaTela(Telas.INICIO);
+    }
+}
+
+function criaPlacar() {
+    const placar = {
+        pontuacao: 0,
+        desenha() {
+            contexto.font = '50px VT323';
+            contexto.fillStyle = 'white';
+            contexto.textAlign = 'right';
+            contexto.fillText(`${placar.pontuacao}`, canvas.width - 10, 35)
+        },
+        atualiza() {
+            const IntervaloDeFrames = 10;
+            const Intervalo = frames % IntervaloDeFrames == 0;
+
+            if (Intervalo) {
+                placar.pontuacao = placar.pontuacao + 1;
+            }
+        }
+    }
+    return placar;
 }
 
 function loop() {
